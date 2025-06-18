@@ -1,4 +1,3 @@
-// app/api/checkout_sessions/route.ts
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
@@ -23,7 +22,7 @@ export async function POST(req: Request) {
             product_data: {
               name: 'Custom Product',
             },
-            unit_amount: amount, // amount in cents
+            unit_amount: amount,
           },
           quantity: 1,
         },
