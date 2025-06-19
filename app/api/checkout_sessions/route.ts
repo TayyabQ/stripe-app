@@ -28,8 +28,8 @@ export async function POST(req: Request) {
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_URL}/success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/cancel`,
+      success_url: `${process.env.NEXT_PUBLIC_URL}/success?payment=success`,
+      // cancel_url: `${process.env.NEXT_PUBLIC_URL}/cancel?payment=cancel`,
     });
 
     console.log('Stripe session created:', session.id);
