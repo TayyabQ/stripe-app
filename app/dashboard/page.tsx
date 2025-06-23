@@ -2,6 +2,7 @@
 
 import { loadStripe } from '@stripe/stripe-js';
 import { FaCheck } from 'react-icons/fa';
+
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 async function fetchPostJSON(url: string, data: any) {
@@ -11,8 +12,12 @@ async function fetchPostJSON(url: string, data: any) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
     return await response.json();
   } catch (error) {
+    console.error('Fetch error:', error);
     throw new Error('Network error');
   }
 }
@@ -22,31 +27,23 @@ export default function Page() {
     try {
       const checkoutSession = await fetchPostJSON(
         '/api/checkout_sessions',
-        { amount: amountInCents }
+        { amount: amountInCents}
       );
 
-      if ((checkoutSession as any).statusCode === 500) {
-        console.error((checkoutSession as any).error);
-        return;
+      const stripe = await stripePromise;
+      if (!stripe) {
+          console.error("Stripe.js has not loaded yet.");
+          return;
       }
 
-      const stripe = await stripePromise;
-      const { error } = await stripe!.redirectToCheckout({
+      const { error } = await stripe.redirectToCheckout({
         sessionId: checkoutSession.id,
       });
 
-      if (error) console.warn(error.message);
-
-      const DB = await fetchPostJSON(
-        '/api/db',
-        {amount: amountInCents}
-      );
-
-      if ((DB as any).statusCode === 500) {
-        console.error((DB as any).error);
-        return;
+      if (error) {
+          console.warn("Error redirecting to checkout:", error.message);
       }
-
+      
     } catch (err) {
       console.error('Checkout error:', err);
     }

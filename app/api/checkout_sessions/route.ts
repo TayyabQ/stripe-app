@@ -1,17 +1,15 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil',
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    console.log('Incoming Request Body:', body);
-
     const { amount } = body;
-    if (!amount) throw new Error('Amount not provided');
+    if (!amount) {
+      throw new Error('Amount is required');
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -20,20 +18,22 @@ export async function POST(req: Request) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: 'Custom Product',
+              name: 'Subscription',
             },
             unit_amount: amount,
           },
-          quantity: 1,
+          quantity: 5,
         },
       ],
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_URL}/success?payment=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/cancel?payment=cancel`,
+      metadata: {
+       
+      },
+      success_url: `${process.env.SITE_URL}/success?payment=success`,
+      cancel_url: `${process.env.SITE_URL}/cancel?=payment=cancel`
     });
 
-    console.log('Stripe session created:', session.id);
-    return NextResponse.json(session);
+    return NextResponse.json({ id: session.id });
   } catch (err: any) {
     console.error('Stripe API error:', err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
