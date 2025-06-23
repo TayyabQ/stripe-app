@@ -36,6 +36,17 @@ export default function Page() {
       });
 
       if (error) console.warn(error.message);
+
+      const DB = await fetchPostJSON(
+        '/api/db',
+        {amount: amountInCents}
+      );
+
+      if ((DB as any).statusCode === 500) {
+        console.error((DB as any).error);
+        return;
+      }
+
     } catch (err) {
       console.error('Checkout error:', err);
     }

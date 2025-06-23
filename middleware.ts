@@ -11,12 +11,12 @@ export default clerkMiddleware(async (auth, req) => {
 
   if(isPaymentProtected(req)) {
     const status = req.nextUrl.searchParams.get('payment');
-    // if(status !==  'success') {
-    //   const url = req.nextUrl.clone();
-    //   url.pathname = '/';
-    //   url.search = '';
-    //   return NextResponse.redirect(url);
-    // }
+    if(status !==  'success') {
+      const url = req.nextUrl.clone();
+      url.pathname = '/';
+      url.search = '';
+      return NextResponse.redirect(url);
+    }
   }
 
   return NextResponse.next();
